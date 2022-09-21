@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/roarsaurus/bot/internal/app/commands"
+	"github.com/roarsaurus/bot/internal/service/product"
 	"log"
 	"os"
 
@@ -30,6 +32,10 @@ func main() {
 		log.Panic(err)
 	}
 
+	productService := product.NewService()
+
+	commander := commands.NewCommander(bot, productService)
+
 	for update := range updates {
 		if update.Message == nil { // If we got a message
 			continue
@@ -37,31 +43,13 @@ func main() {
 
 		switch update.Message.Command() {
 		case "help":
-			helpCommand(bot, update.Message)
+			commander.Help(update.Message)
+		case "list":
+			commander.List(update.Message)
 		default:
-			defaultBehavior(bot, update.Message)
+			commander.Default(update.Message)
 		}
-
-		if update.Message.Command() == "help" {
-			helpCommand(bot, update.Message)
-			continue
-		}
-		defaultBehavior(bot, update.Message)
 	}
 }
 
-func helpCommand(bot *tgbotapi.BotAPI, inputMessage *tgbotapi.Message) {
-	msg := tgbotapi.NewMessage(inputMessage.Chat.ID, "/help - help")
-
-	bot.Send(msg)
-
-}
-
-func defaultBehavior(bot *tgbotapi.BotAPI, inputMessage *tgbotapi.Message) {
-	log.Printf("[%s] %s", inputMessage.From.UserName, inputMessage.Text)
-
-	msg := tgbotapi.NewMessage(inputMessage.Chat.ID, "You wrote: "+inputMessage.Text)
-	msg.ReplyToMessageID = inputMessage.MessageID
-
-	bot.Send(msg)
-}
+//02:32:09
