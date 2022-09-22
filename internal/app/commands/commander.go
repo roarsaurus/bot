@@ -5,12 +5,15 @@ import (
 	"github.com/roarsaurus/bot/internal/service/product"
 )
 
+var registeredCommands = map[string]func(c *Commander, msg tgbotapi.Message){}
+
 type Commander struct {
 	bot            *tgbotapi.BotAPI
 	productService *product.Service
 }
 
-func NewCommander(bot *tgbotapi.BotAPI,
+func NewCommander(
+	bot *tgbotapi.BotAPI,
 	productService *product.Service,
 ) *Commander {
 	return &Commander{
